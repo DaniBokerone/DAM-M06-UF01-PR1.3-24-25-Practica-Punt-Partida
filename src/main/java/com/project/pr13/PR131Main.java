@@ -1,14 +1,20 @@
 package com.project.pr13;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.File;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.File;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Text;
 
 /**
  * Classe principal que crea un document XML amb informació de llibres i el guarda en un fitxer.
@@ -93,7 +99,47 @@ public class PR131Main {
      */
     private static Document construirDocument() {
         // *************** CODI PRÀCTICA **********************/
-       return null; // Substitueix pel teu
+
+        try {
+
+            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            DocumentBuilder db = dbf.newDocumentBuilder();
+            Document doc = db.newDocument();
+    
+            Element biblioteca = doc.createElement("biblioteca");
+            doc.appendChild(biblioteca);
+    
+            //LLibre
+            Element llibre = doc.createElement("llibre");
+            Attr attrId = doc.createAttribute("id");
+            attrId.setValue(String.format("%03d", 1));
+            llibre.setAttributeNode(attrId);
+    
+            // Llibre - Elelements
+            llibre.appendChild(createElementTemplate(doc, "titol", "El viatge dels venturons"));
+            llibre.appendChild(createElementTemplate(doc, "autor", "Joan Pla"));
+            llibre.appendChild(createElementTemplate(doc, "anyPublicacio", "1998"));
+            llibre.appendChild(createElementTemplate(doc, "editorial", "Edicions Mar"));
+            llibre.appendChild(createElementTemplate(doc, "genere", "Aventura"));
+            llibre.appendChild(createElementTemplate(doc, "pagines", "320"));
+            llibre.appendChild(createElementTemplate(doc, "disponible", "true"));
+    
+            biblioteca.appendChild(llibre);
+    
+            return doc;
+    
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+
+    private static Element createElementTemplate(Document doc, String elementName, String textContent) {
+        Element element = doc.createElement(elementName);
+        Text textNode = doc.createTextNode(textContent);
+        element.appendChild(textNode);
+        return element;
     }
 
     /**
@@ -104,5 +150,22 @@ public class PR131Main {
      */
     private static void guardarDocument(Document doc, File fitxerSortida) {
         // *************** CODI PRÀCTICA **********************/
+        try {
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();            
+            Transformer transformer = transformerFactory.newTransformer();
+            
+            // Opcional: Configurar la salida para que el XML esté "bien formateado"
+            transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
+
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(fitxerSortida);
+            
+            transformer.transform(source, result);
+            
+            System.out.println("Document XML guardat correctament");
+        } catch (TransformerException e) {
+            e.printStackTrace();
+        }
     }
 }

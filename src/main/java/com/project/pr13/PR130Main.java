@@ -1,15 +1,16 @@
 package com.project.pr13;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
-import com.project.pr13.format.PersonaFormatter;
+import java.io.File;
+import java.io.IOException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
-import java.io.InputStream;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * Classe principal que gestiona la lectura i el processament de fitxers XML per obtenir dades de persones.
@@ -53,8 +54,8 @@ public class PR130Main {
         Document doc = parseXML(inputFile);
         if (doc != null) {
             NodeList persones = doc.getElementsByTagName("persona");
-            // imprimirCapçaleres();
-            // imprimirDadesPersones(persones);
+            imprimirCapçaleres();
+            imprimirDadesPersones(persones);
         }
     }
 
@@ -66,6 +67,34 @@ public class PR130Main {
      */
     public static Document parseXML(File inputFile) {
         // *************** CODI PRÀCTICA **********************/
-        return null; // Substitueix pel teu        
+        Document doc = null;
+        try {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+            doc = dBuilder.parse(inputFile);
+            doc.getDocumentElement().normalize();
+        } catch (ParserConfigurationException | SAXException | IOException e) {
+            e.printStackTrace();
+        }
+        return doc;       
+    }
+
+    private void imprimirCapçaleres() {
+        System.out.printf("%-10s %-15s %-5s %-10s%n", "Nom", "Cognom", "Edat", "Ciutat");
+        System.out.println("---------- --------------- ----- ---------");
+    }
+
+    private void imprimirDadesPersones(NodeList persones) {
+        for (int i = 0; i < persones.getLength(); i++) {
+            Element persona = (Element) persones.item(i);
+
+            String nom = persona.getElementsByTagName("nom").item(0).getTextContent();
+            String cognom = persona.getElementsByTagName("cognom").item(0).getTextContent();
+            String edat = persona.getElementsByTagName("edat").item(0).getTextContent();
+            String ciutat = persona.getElementsByTagName("ciutat").item(0).getTextContent();
+
+            System.out.printf("%-10s %-15s %-5s %-10s%n", nom, cognom, edat, ciutat);
+        }
     }
 }
